@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<merge xmlns:android="http://schemas.android.com/apk/res/android" xmlns:ericsson="http://schemas.android.com/apk/res/com.ericsson.android.indoormaps" xmlns:android1="http://schemas.android.com/apk/res/android">
+
+    <LinearLayout
+        android1:id="@+id/linearLayout2"
+        android1:layout_width="match_parent"
+        android1:layout_height="match_parent"
+        android1:orientation="vertical" android1:layout_marginTop="45dp" android1:layout_gravity="bottom">
+
+        <LinearLayout
+            android1:id="@+id/linearLayout1"
+            android1:layout_width="match_parent"
+            android1:layout_height="wrap_content" android1:layout_gravity="top">
+
+           <!-- <Button
+                android1:id="@+id/buttonTest"
+                android1:layout_width="wrap_content"
+                android1:layout_height="wrap_content"
+                android1:layout_margin="5dp"
+                android1:text="Test" /> -->
+                
+
+            <ImageButton
+                android1:id="@+id/buttonPrev"
+                android1:layout_width="wrap_content"
+                android1:layout_height="wrap_content"
+                android1:layout_marginTop="5dp"
+                android1:src="@android:drawable/ic_media_previous" />
+
+            <ImageButton
+                android1:id="@+id/buttonCancelRoute"
+                android1:layout_width="wrap_content"
+                android1:layout_height="wrap_content"
+                android1:layout_marginTop="5dp"
+                android1:src="@android:drawable/ic_media_play"
+                android1:text="Route" />
+
+            <ImageButton
+                android1:id="@+id/buttonNext"
+                android1:layout_width="wrap_content"
+                android1:layout_height="wrap_content"
+                android1:layout_marginTop="5dp"
+                android1:src="@android:drawable/ic_media_next" />
+        </LinearLayout>
+
+        <LinearLayout
+            android1:id="@+id/linearLayout3"
+            android1:layout_width="match_parent"
+            android1:layout_height="match_parent" >
+            
+            <Button
+                android1:id="@+id/buttonChangeFloor"
+                android1:layout_width="wrap_content"
+                android1:layout_height="wrap_content"
+                android1:text="Change Floor" android1:layout_gravity="bottom" android1:layout_marginLeft="5dp" android1:layout_marginBottom="2dp"/>
+            
+
+            <!-- 
+			<ImageButton
+                android1:id="@+id/buttonChangeFloor"
+                android1:layout_width="wrap_content"
+                android1:layout_height="wrap_content"
+                android1:layout_marginLeft="5dp"
+                android1:layout_marginBottom="2dp"
+                android1:layout_gravity="bottom"
+                android1:src="@android:drawable/elevator_image" />
+			-->
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Route buttons -->
+</merge>
+

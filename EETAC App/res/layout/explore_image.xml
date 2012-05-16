@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:weightSum="1.0" >
+    <com.markupartist.android.widget.ActionBar
+    android:id="@+id/actionbar"
+    style="@style/ActionBar"
+    />
+
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="160dp"
+        android:paddingBottom="2dp" >
+
+<!--         <Button
+            android:id="@+id/button1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/arrow_indicator_left" /> -->
+
+    <Gallery
+        android:id="@+id/galleryImage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:layout_gravity="center_vertical"/>
+
+<!--         <Button
+            android:id="@+id/button1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/arrow_indicator_right" /> -->
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="22dp"
+        android:background="@color/blue_separator"
+        android:orientation="vertical"
+        android:paddingLeft="1dp" >
+
+        <TextView
+            android:id="@+id/comm1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left|center_vertical"
+            android:ellipsize="end"
+            android:text="Comments"
+            android:textColor="@color/all_white"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayoutAddComment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="4dp"
+        android:weightSum="1.0" 
+        android:visibility="gone">
+
+        <EditText
+            android:id="@+id/addTextComment"
+            android:layout_width="0dip"
+            android:layout_height="70dp"
+            android:layout_weight=".80"
+            android:inputType="textMultiLine" >
+
+            <requestFocus />
+        </EditText>
+
+        <Button
+            android:id="@+id/enterComment"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|right"
+            android:layout_weight=".20"
+            android:onClick="onClick"
+            android:text="Send" />
+    </LinearLayout>
+
+    <ListView
+        android:id="@android:id/list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+    </ListView>
+
+</LinearLayout>

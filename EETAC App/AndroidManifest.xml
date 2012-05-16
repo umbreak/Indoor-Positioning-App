@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="android.ui"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk android:minSdkVersion="10" />
+
+    <supports-screens android:anyDensity="true" >
+    </supports-screens>
+
+    <uses-permission android:name="android.permission.INTERNET" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.VIBRATE" >
+    </uses-permission>
+
+    <application
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/CustomTheme" >
+       
+                <!-- IntentServices defined -->
+        <service android:name=".restclient.service.GETService" />
+        <service android:name=".restclient.service.PUTService" />
+        <service android:name=".restclient.service.IMGService" />
+        
+        <activity
+            android:name=".Splash"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
+        <!-- LOGIN main activity -->
+        <activity
+            android:name=".LoginActivity"
+            android:label="@string/app_name" >
+        </activity>
+
+        <!-- REGISTER main activity -->
+        <activity
+            android:name=".RegisterActivity"
+            android:label="@string/app_name"  >
+        </activity>
+
+        <!-- MAP main activity -->
+        <activity
+            android:name=".map.MapActivity"
+            android:label="@string/menu_map" >
+        </activity>
+
+        <!-- CHECK main activity -->
+        <activity
+            android:name=".check.CheckInActivity"
+            android:label="@string/menu_check" >
+        </activity>
+
+        <!-- EXPLORE main activity -->
+        <activity
+            android:name=".explore.ExploreActivity"
+            android:label="@string/menu_explore" >
+        </activity>
+
+        <!-- PROF main activity -->
+        <activity
+            android:name=".pref.ProfileActivity"
+            android:label="@string/menu_prof" >
+        </activity>
+
+        <!-- EXPLOR_SHORT main activity -->
+        <activity
+            android:name=".explore.ExploreTabSelectionActivity"
+            android:label="@string/menu_explore" >
+        </activity>
+
+        <!-- EXPLORE_LARGE activity -->
+        <activity
+            android:name=".explore.ExploreLargeActivity"
+            android:label="@string/menu_explore"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+
+        <!-- EXPLORE_IMAGE activity -->
+        <activity
+            android:name=".explore.ExploreImageActivity"
+            android:label="@string/menu_explore"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+
+        <!-- EXPLORE_FAVORITE activity -->
+        <activity
+            android:name=".explore.ExploreFavoritesActivity"
+            android:label="@string/menu_explore" >
+        </activity>
+
+        <!-- TEST activity -->
+        <activity
+            android:name=".TestActivity"
+            android:label="@string/menu_explore" >
+        </activity>
+    </application>
+
+</manifest>

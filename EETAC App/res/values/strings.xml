@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="hello">Hello World, LoginActivity!</string>
+    <string name="app_name">EETAC APP</string>
+    <string name="login_tittle">Login</string>
+    <string name="login_username">Username</string>
+    <string name="login_password">Password</string>
+    <string name="login_ok">Login</string>
+    <string name="menu_map">Map</string>
+    <string name="menu_check">Check-in</string>
+    <string name="menu_prof">Profile</string>
+    <string name="menu_explore">Explore</string>
+    <string name="menu_explore_large">SiteName</string>
+    <string name="prefs_username">Username</string>
+    <string name="prefs_sum_username">Your User account.</string>
+    <string name="prefs_pass">Password</string>
+    <string name="prefs_sum_pass">Your Password account.</string>
+    <string name="no_internet_available">No internet access.</string>
+    <string name="register"><u>Register a new account</u></string>
+
+</resources>

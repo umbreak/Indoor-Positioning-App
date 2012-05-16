@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <com.markupartist.android.widget.ActionBar
+        android:id="@+id/actionbar"
+        style="@style/ActionBar" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="3dp" >
+
+        <TextView
+            android:id="@+id/siteName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:paddingLeft="4dp"
+            android:paddingRight="4dp"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <ToggleButton
+            android:id="@+id/favoriteButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="10dip"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/favorite_button"
+            android:textOff=""
+            android:textOn="" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:weightSum="1.0" >
+
+        <ImageView
+            android:id="@+id/avatar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:scaleType="fitXY"
+            android:padding="3dp"/>
+
+        <TextView
+            android:id="@+id/siteDesc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:layout_weight="1" />
+
+        <ToggleButton
+            android:id="@+id/checkButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:onClick="onClick"
+            android:textOff="Check-In"
+            android:textOn="Check-Out" 
+            android:textSize="12dp"/>
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="22dp"
+        android:background="@color/blue_separator"
+        android:orientation="vertical"
+        android:paddingLeft="1dp" >
+
+        <TextView
+            android:id="@+id/pic1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left|center_vertical"
+            android:ellipsize="end"
+            android:text="Pictures"
+            android:textColor="@color/all_white"
+            android:textStyle="bold" />
+    </LinearLayout>
+        <LinearLayout
+        android:id="@+id/linearLayout3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingLeft="5dp"
+         >
+        <Button
+            android:id="@+id/imageButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/new_picture_btn"
+            android:onClick="onClick"
+            android:layout_marginRight="3px"
+            android:textSize="12dip" 
+            android:visibility="visible"
+            android:enabled="false"/>
+    <Gallery
+        android:id="@+id/gallery"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:layout_gravity="center_vertical"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="22dp"
+        android:background="@color/blue_separator"
+        android:orientation="vertical"
+        android:paddingLeft="1dp" >
+
+        <TextView
+            android:id="@+id/comm1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left|center_vertical"
+            android:ellipsize="end"
+            android:text="Comments"
+            android:textColor="@color/all_white"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/commentLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="4dp"
+        android:visibility="gone"
+        android:weightSum="1.0" >
+
+        <EditText
+            android:id="@+id/addTextComment"
+            android:layout_width="0dip"
+            android:layout_height="70dp"
+            android:layout_weight=".80"
+            android:inputType="textMultiLine" >
+
+            <requestFocus />
+        </EditText>
+
+        <Button
+            android:id="@+id/enterComment"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight=".20"
+            android:onClick="onClick"
+            android:text="Send" />
+    </LinearLayout>
+
+    <ListView
+        android:id="@android:id/list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+    </ListView>
+
+</LinearLayout>

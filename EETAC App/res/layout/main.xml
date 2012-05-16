@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/background"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="6sp" >
+
+        <TextView
+            android:id="@+id/loginTittle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="0.27"
+            android:paddingLeft="20sp"
+            android:shadowColor="@color/shadow"
+            android:shadowDx="1"
+            android:shadowDy="1"
+            android:shadowRadius="0.03"
+            android:text="@string/login_tittle"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="30sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/imageView1"
+            android:layout_width="102dp"
+            android:layout_height="102dp"
+            android:layout_gravity="right"
+            android:src="@drawable/logo1" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingBottom="10sp"
+        android:paddingLeft="10sp"
+        android:paddingRight="15sp"
+        android:paddingTop="25sp" >
+
+        <TextView
+            android:layout_width="75dp"
+            android:layout_height="wrap_content"
+            android:text="@string/login_username" />
+
+        <EditText
+            android:id="@+id/userText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="27.09"
+            android:singleLine="true" >
+
+            <requestFocus />
+        </EditText>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingBottom="10sp"
+        android:paddingLeft="10sp"
+        android:paddingRight="15sp"
+        android:paddingTop="5sp" >
+
+        <TextView
+            android:layout_width="75dp"
+            android:layout_height="wrap_content"
+            android:text="@string/login_password" />
+
+        <EditText
+            android:id="@+id/passText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:inputType="textPassword"
+            android:singleLine="true" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/loginButton"
+        android:layout_width="80dp"
+        android:layout_height="38dp"
+        android:layout_gravity="center_horizontal"
+        android:onClick="onClick"
+        android:text="@string/login_ok" />
+
+    <TextView
+        android:id="@+id/registerText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onClick"
+        android:padding="10dp"
+        android:text="@string/register"
+        android:textColor="@color/blue_separator" />
+
+    <LinearLayout
+        android:id="@+id/LinearLayout01"
+        android:layout_width="match_parent"
+        android:layout_height="22dp"
+        android:background="@color/blue_separator"
+        android:orientation="vertical"
+        android:paddingLeft="1dp" >
+
+        <TextView
+            android:id="@+id/comm1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left|center_vertical"
+            android:ellipsize="end"
+            android:text="Login with externals"
+            android:textColor="@color/all_white"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#e9e9e9"
+        android:orientation="horizontal"
+        android:paddingTop="9dp"
+        android:weightSum="1.0" >
+
+        <LinearLayout
+            android:id="@+id/linearLayout3"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight=".50"
+            android:orientation="vertical" >
+
+            <ImageView
+                android:id="@+id/imageView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:src="@drawable/facebook_login" />
+
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|center_horizontal"
+                android:text="Facebook" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayout3"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight=".50"
+            android:orientation="vertical" >
+
+            <ImageView
+                android:id="@+id/imageView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:src="@drawable/twitter_login" />
+
+            <TextView
+                android:id="@+id/TextView01"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|center_horizontal"
+                android:text="Twitter" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/LinearLayout03"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#e9e9e9"
+        android:orientation="horizontal"
+        android:paddingBottom="10sp"
+        android:paddingLeft="10sp"
+        android:paddingRight="4sp"
+        android:paddingTop="5sp"
+        android:weightSum="1.0" >
+    </LinearLayout>
+
+</LinearLayout>

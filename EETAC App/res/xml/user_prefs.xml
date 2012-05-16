@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <!--
+         <com.markupartist.android.widget.ActionBar
+    android:id="@+id/actionbar"
+    style="@style/ActionBar"
+    />
+    -->
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="checkbox"
+        android:summary="Update layouts even when go backwards (slowly)"
+        android:title="Update Always" />
+
+    <EditTextPreference
+        android:key="username"
+        android:summary="Enter user name"
+        android:title="Username" >
+    </EditTextPreference>
+    <EditTextPreference
+        android:key="password"
+        android:password="true"
+        android:summary="Enter Password for the user name."
+        android:title="Password" >
+    </EditTextPreference>
+    <EditTextPreference
+        android:defaultValue="192.168.1.5"
+        android:key="server_ip"
+        android:summary="Enter the REST Server IP"
+        android:title="Server IP" >
+    </EditTextPreference>
+
+</PreferenceScreen>
