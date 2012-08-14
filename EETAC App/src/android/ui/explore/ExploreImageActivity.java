@@ -1,18 +1,23 @@
 package android.ui.explore;
 
 import static android.utils.Actions.*;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.ui.CustomDialog;
 import android.ui.R;
 import android.ui.adapters.CommentAdapter;
 import android.ui.adapters.ImageAdapter;
+import android.ui.adapters.OnCustomClickListener;
+import android.ui.adapters.CommentAdapter.ViewHolderComment;
 import android.ui.pojos.Comment;
 import android.ui.pojos.Site;
 import android.utils.ActualSite;
@@ -27,6 +32,7 @@ import android.view.View;
 import android.view.View.OnKeyListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.EditText;
 import android.widget.Gallery;
@@ -45,7 +51,7 @@ import com.markupartist.android.widget.ActionBar.AbstractAction;
  * and handle the response by implementing onReceiveResult.*/
 
 
-public class ExploreImageActivity extends ListActivity implements MyResultReceiver.Receiver{
+public class ExploreImageActivity extends ListActivity implements MyResultReceiver.Receiver, OnCustomClickListener{
 	private CommentAdapter m_adapter;
 	private ArrayList<Comment> listComments;
 	private TextView textComments;
@@ -71,6 +77,10 @@ public class ExploreImageActivity extends ListActivity implements MyResultReceiv
 	public boolean onOptionsItemSelected(MenuItem item) {
 		return helper.onOptionsItemSelected(item);
 	}
+	protected void onPause() {
+		mState.mReceiver.clearReceiver();
+		super.onPause();
+	}
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -91,7 +101,6 @@ public class ExploreImageActivity extends ListActivity implements MyResultReceiv
 			mState = new State();
 			//Receive the integer of the Site we want to display.
 			mState.site.id=getIntent().getExtras().getInt(SITE_VAULE);
-			System.out.println("ID del site: " + mState.site.id);
 			mState.mReceiver.setReceiver(this);
 			if (!preferences.getBoolean(UPDATE_ALWAYS, false))
 				onRefreshClick.performAction(null);
@@ -128,11 +137,28 @@ public class ExploreImageActivity extends ListActivity implements MyResultReceiv
 
 			}
 		});
+		gallery.setOnItemClickListener(new OnItemClickListener() {
 
+			public void onItemClick(AdapterView<?> parent, View view, int position,
+					long id) {
+				String long_route=im_adapter.pictures.get(position).route_image;
+				long_route=long_route.substring(long_route.lastIndexOf('/') + 1);
+				long_route=ToolKit.i.cacheDir.getPath() + "/" + long_route;
+				Intent i = new Intent(Intent.ACTION_VIEW);
+				i.setDataAndType(Uri.parse("file://" + long_route), "image/*");
+				startActivity(i); 
 
+				
+			}
+			
+		});
+		
+//		startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("content://media/external/images/media/16"))); /** replace with your own uri */
+		
+		
 		listComments = new ArrayList<Comment>();
 		getListView().setItemsCanFocus(true);
-		this.m_adapter = new CommentAdapter(this, R.layout.comments, listComments);
+		this.m_adapter = new CommentAdapter(preferences.getInt(PREFS_USER_ID, 0), this, R.layout.comments, listComments, this);
 		setListAdapter(this.m_adapter);
 
 		textComments.setOnKeyListener(new OnKeyListener() {
@@ -147,7 +173,6 @@ public class ExploreImageActivity extends ListActivity implements MyResultReceiv
 		});
 
 		gallery.setSelection(getIntent().getExtras().getInt(PICTURE_URL), true);
-		System.out.println("PICTURE POSITION: " + getIntent().getExtras().getInt(PICTURE_URL) + " PICTURE ID: " + getIntent().getExtras().getInt(PICTURE_VALUE));
 	}
 
 	@Override
@@ -157,9 +182,10 @@ public class ExploreImageActivity extends ListActivity implements MyResultReceiv
 		mState.mReceiver.clearReceiver();
 		return mState;
 	}
-
+	
 	@Override
 	protected void onResume() {
+		mState.mReceiver.setReceiver(this);
 		MenuHelper.actionBar=(ActionBar) findViewById(R.id.actionbar);
 		if (preferences.getBoolean(UPDATE_ALWAYS, false))
 			onRefreshClick.performAction(null);
@@ -179,7 +205,7 @@ public class ExploreImageActivity extends ListActivity implements MyResultReceiv
 	private void addComment(){
 		imm.hideSoftInputFromWindow(textComments.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);	
 		if (!textComments.getText().toString().equals("")){
-			Comment c= new Comment(PreferenceManager.getDefaultSharedPreferences(this).getString(PREFS_USER, ""),textComments.getText().toString(), "", 0);
+			Comment c= new Comment(preferences.getString(PREFS_USER, ""),textComments.getText().toString(), "", 0);
 			ToolKit.updateRefreshStatus(mState.mSyncing);
 			Bundle b= new Bundle();
 			b.putParcelable(COMMENT_VAULE, c);
@@ -202,7 +228,7 @@ public class ExploreImageActivity extends ListActivity implements MyResultReceiv
 	private class RefreshClick extends AbstractAction {
 
 		public RefreshClick() {
-			super(R.drawable.ic_menu_mapmode);
+			super(R.drawable.ic_title_refresh_default);
 		}
 		public void performAction(View view) {
 			ToolKit.updateRefreshStatus(mState.mSyncing);
@@ -261,6 +287,17 @@ public class ExploreImageActivity extends ListActivity implements MyResultReceiv
 			ToolKit.updateRefreshStatus(mState.mSyncing);
 			break;
 		}
+		case STATUS_FINISHED_DEL_COMMENT: {
+			int comment_pos=resultData.getInt(COMMENT_POSITION);
+			Comment c= m_adapter.getItem(comment_pos);
+			m_adapter.notifyDataSetChanged();
+			m_adapter.remove(c);
+			m_adapter.notifyDataSetChanged();
+
+			mState.mSyncing = false;
+			ToolKit.updateRefreshStatus(mState.mSyncing);
+			break;
+		}
 		case STATUS_ERROR: {
 			// Error happened down in SyncService, show as toast.
 			mState.mSyncing = false;
@@ -269,6 +306,20 @@ public class ExploreImageActivity extends ListActivity implements MyResultReceiv
 			break;
 		}
 		}		
+	}
+	public void OnCustomClick(View v, int position) {
+		if (v.getId() == R.id.deleteButton){
+			int comment_id=(Integer)v.getTag();
+			Bundle b= new Bundle();
+			b.putInt(COMMENT_VAULE, comment_id);
+			b.putInt(COMMENT_POSITION, position);
+			ServiceHelper.startAction(DEL_COMMENT, String.valueOf(mState.site.id), b, mState.mReceiver, getApplicationContext());		
+		}
+		else{
+			ViewHolderComment holder=(ViewHolderComment)v.getTag();
+			CustomDialog.showDialog(this, holder.author.getText().toString(),  holder.text.getText().toString(), 0);
+		}
+
 	}
 
 }

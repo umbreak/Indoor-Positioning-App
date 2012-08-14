@@ -9,6 +9,7 @@ public class Comment implements Parcelable{
 	public String author;
 	public String text;
 	public String date;
+	public int user_id;
 
 	public Comment(String author, String text, String date, int id) {
 		super();
@@ -36,6 +37,7 @@ public class Comment implements Parcelable{
 	
 	private Comment(Parcel in) {
 		id = in.readInt();
+		user_id = in.readInt();
 		date= in.readString();
 		text= in.readString();
 		author=in.readString();
@@ -46,16 +48,16 @@ public class Comment implements Parcelable{
 	}
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeInt(id);
+		dest.writeInt(user_id);
 
 		dest.writeString(date);
 		dest.writeString(text);
 		dest.writeString(author);
 	}
-
 	@Override
 	public String toString() {
-		return "\nComment [author=" + author + ", text=" + text + ", date="
-				+ date + ", id=" + id + "]\n";
+		return "Comment [id=" + id + ", author=" + author + ", text=" + text
+				+ ", date=" + date + ", user_id=" + user_id + "]";
 	}	
 
 }

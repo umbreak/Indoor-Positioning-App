@@ -4,8 +4,6 @@
     android:versionCode="1"
     android:versionName="1.0" >
 
-    <uses-sdk android:minSdkVersion="10" />
-
     <supports-screens android:anyDensity="true" >
     </supports-screens>
 
@@ -20,17 +18,19 @@
     </uses-permission>
     <uses-permission android:name="android.permission.VIBRATE" >
     </uses-permission>
-
+    <uses-sdk
+        android:minSdkVersion="7"
+        android:targetSdkVersion="10" />
     <application
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/CustomTheme" >
-       
-                <!-- IntentServices defined -->
+
+        <!-- IntentServices defined -->
         <service android:name=".restclient.service.GETService" />
         <service android:name=".restclient.service.PUTService" />
         <service android:name=".restclient.service.IMGService" />
-        
+
         <activity
             android:name=".Splash"
             android:label="@string/app_name" >
@@ -40,7 +40,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
+
         <!-- LOGIN main activity -->
         <activity
             android:name=".LoginActivity"
@@ -50,7 +50,7 @@
         <!-- REGISTER main activity -->
         <activity
             android:name=".RegisterActivity"
-            android:label="@string/app_name"  >
+            android:label="@string/app_name" >
         </activity>
 
         <!-- MAP main activity -->
@@ -87,6 +87,7 @@
         <activity
             android:name=".explore.ExploreLargeActivity"
             android:label="@string/menu_explore"
+            android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden" >
         </activity>
 
@@ -102,12 +103,22 @@
             android:name=".explore.ExploreFavoritesActivity"
             android:label="@string/menu_explore" >
         </activity>
+                <!-- EXPLORE_RECENTS activity -->
+        <activity
+            android:name=".explore.ExploreRecentsActivity"
+            android:label="@string/menu_explore" >
+        </activity>
 
         <!-- TEST activity -->
         <activity
             android:name=".TestActivity"
             android:label="@string/menu_explore" >
         </activity>
-    </application>
 
+        <!-- TWITTER_AUTH activity -->
+        <activity
+            android:name=".twitter.OAuthAccessTokenActivity"
+            android:label="Twitter Authe" >
+        </activity>
+    </application>
 </manifest>

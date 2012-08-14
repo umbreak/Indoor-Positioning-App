@@ -56,8 +56,10 @@ public class GETService extends IntentService{
 				isShort=intent.getExtras().getBoolean(SITE_SHORT);
 				if (isShort)
 					ActualSite.shortSite=Processor.i.getShortSite(intent.getStringExtra(SITE_VAULE));
+				
 				else
 					ActualSite.site=Processor.i.getSite(intent.getStringExtra(SITE_VAULE));
+				
 
 				Log.d(TAG, "sync finished GET_SITE");
 				if (receiver != null) receiver.send(STATUS_FINISHED, Bundle.EMPTY);
@@ -65,7 +67,7 @@ public class GETService extends IntentService{
 			} catch(Exception e) {
 				Log.e(TAG, "Problem while syncing", e);
 				if (receiver != null) {
-					b.putString(Intent.EXTRA_TEXT, e.toString());
+					b.putString(Intent.EXTRA_TEXT, "Site doesn't exist in the database");
 					receiver.send(STATUS_ERROR, b);
 				}
 			}    

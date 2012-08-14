@@ -47,8 +47,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:scaleType="fitXY"
-            android:padding="3dp"/>
+            android:padding="3dp"
+            android:scaleType="fitXY" />
 
         <TextView
             android:id="@+id/siteDesc"
@@ -64,52 +64,8 @@
             android:layout_gravity="top"
             android:onClick="onClick"
             android:textOff="Check-In"
-            android:textOn="Check-Out" 
-            android:textSize="12dp"/>
-
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/linearLayout2"
-        android:layout_width="match_parent"
-        android:layout_height="22dp"
-        android:background="@color/blue_separator"
-        android:orientation="vertical"
-        android:paddingLeft="1dp" >
-
-        <TextView
-            android:id="@+id/pic1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="left|center_vertical"
-            android:ellipsize="end"
-            android:text="Pictures"
-            android:textColor="@color/all_white"
-            android:textStyle="bold" />
-    </LinearLayout>
-        <LinearLayout
-        android:id="@+id/linearLayout3"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingLeft="5dp"
-         >
-        <Button
-            android:id="@+id/imageButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:background="@drawable/new_picture_btn"
-            android:onClick="onClick"
-            android:layout_marginRight="3px"
-            android:textSize="12dip" 
-            android:visibility="visible"
-            android:enabled="false"/>
-    <Gallery
-        android:id="@+id/gallery"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" android:layout_gravity="center_vertical"/>
+            android:textOn="Check-Out"
+            android:textSize="12dp" />
     </LinearLayout>
 
     <LinearLayout
@@ -159,10 +115,66 @@
             android:text="Send" />
     </LinearLayout>
 
-    <ListView
-        android:id="@android:id/list"
+    <LinearLayout
+        android:id="@+id/linearLayout4"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
-    </ListView>
+        android:layout_height="wrap_content"
+        android:orientation="vertical" 
+        android:weightSum="1.0">
+
+        <ListView
+            android:id="@android:id/list"
+            android:layout_width="match_parent"
+            android:layout_height="0dip"
+            android:paddingBottom="2dp"
+            android:layout_weight="1">
+        </ListView>
+
+        <LinearLayout
+            android:id="@+id/linearLayout2"
+            android:layout_width="match_parent"
+            android:layout_height="22dp"
+            android:background="@color/blue_separator"
+            android:orientation="vertical"
+            android:paddingLeft="1dp" >
+
+            <TextView
+                android:id="@+id/pic1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left|center_vertical"
+                android:ellipsize="end"
+                android:text="Pictures"
+                android:textColor="@color/all_white"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayout3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingLeft="5dp" >
+
+            <Button
+                android:id="@+id/imageButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginRight="3px"
+                android:background="@drawable/new_picture_btn"
+                android:enabled="false"
+                android:onClick="onClick"
+                android:textSize="12dip"
+                android:visibility="visible" />
+
+            <Gallery
+                android:id="@+id/gallery"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1" />
+        </LinearLayout>
+    </LinearLayout>
 
 </LinearLayout>

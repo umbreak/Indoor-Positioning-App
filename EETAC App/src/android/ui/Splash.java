@@ -1,6 +1,7 @@
 package android.ui;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import android.app.Activity;
 import static android.utils.Actions.*;
@@ -11,6 +12,8 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.ui.explore.ExploreActivity;
 import android.ui.restclient.Processor;
+import android.ui.twitter.OAuthAccessTokenActivity;
+import android.ui.twitter.TwitterUtils;
 import android.utils.MyResultReceiver;
 import android.utils.ServiceHelper;
 import android.utils.ToolKit;
@@ -44,7 +47,7 @@ public class Splash extends Activity implements MyResultReceiver.Receiver{
 			@Override
 			public void run() {
 				try{
-					sleep(2500);
+					sleep(3500);
 				}catch(InterruptedException e){
 					e.printStackTrace();
 				}finally{
@@ -62,18 +65,35 @@ public class Splash extends Activity implements MyResultReceiver.Receiver{
 		PreferenceManager.setDefaultValues(this, R.xml.user_prefs,true);
 		SharedPreferences prefs=PreferenceManager.getDefaultSharedPreferences(this);
 		Processor.setUrl(prefs.getString(PREFS_SERVER, null));
+		Processor.appContext=getApplicationContext();
 		ToolKit.i.setContext(getApplicationContext());
-		System.out.println("lereleeeeeee");
 		Processor.cache_path=ToolKit.i.cacheDir;
 
 		String user=prefs.getString(PREFS_USER, "");
 		if (!user.isEmpty()){
 			findViewById(R.id.userLayout).setVisibility(View.VISIBLE);
 			((TextView)findViewById(R.id.userName)).setText("Login with: " + user);
-			ServiceHelper.startAction(POST_LOGIN, mReceiver,getApplicationContext());
+			if (prefs.getInt(PREFS_TWITTER_ID, 0) == 0)
+				ServiceHelper.startAction(LOGIN, mReceiver,getApplicationContext());
+			else
+				//If we're using Twitter credentials, let's see if Twitter token already works or expired. If we're still authenticated in twitter, let's authenticate in our system.
+				//If we're not authenticated in twitter, let's start the twitter auth activity
+				if (TwitterUtils.isAuthenticated(prefs))
+					ServiceHelper.startAction(LOGIN, mReceiver,getApplicationContext());
+				else
+					startActivity(new Intent(this, OAuthAccessTokenActivity.class));
 		}		
 	}
-
+	@Override
+	protected void onPause() {
+		mReceiver.clearReceiver();
+		super.onPause();
+	}
+	@Override
+	protected void onResume() {
+		mReceiver.setReceiver(this);
+		super.onResume();
+	}
 	@Override
 	public Object onRetainNonConfigurationInstance() {
 		// Clear any strong references to this Activity, we'll reattach to
@@ -88,30 +108,14 @@ public class Splash extends Activity implements MyResultReceiver.Receiver{
 			break;
 		}
 		case STATUS_FINISHED: {
-			int result=Integer.valueOf(resultData.getString(POST_LOGIN));
-			if (result>=0){
-				login=true;
-				SharedPreferences.Editor editor=getSharedPreferences(PREFS_FILE, 0).edit();
-				editor.putInt(PREFS_USER_ID, result);
-				editor.commit();
-
-			} else if (result == -1){
-				Toast.makeText(Splash.this, "Password incorrect", Toast.LENGTH_LONG).show();
-				((TextView)findViewById(R.id.userName)).setText("Password incorrect");
-			}else if (result==-3){
-				Toast.makeText(Splash.this, "User not found", Toast.LENGTH_LONG).show();
-				((TextView)findViewById(R.id.userName)).setText("User not found");
-			}
-
-			else{
-				Toast.makeText(Splash.this, "No response from the server " + PreferenceManager.getDefaultSharedPreferences(this).getString(PREFS_SERVER, null),  Toast.LENGTH_LONG).show();
-				((TextView)findViewById(R.id.userName)).setText("No response from the server");
-
-			}
+			login=true;
 			break;
 		}
 		case STATUS_ERROR: {
-			Toast.makeText(Splash.this, "Error in the authentication process", Toast.LENGTH_LONG).show();
+			String result=resultData.getString(Intent.EXTRA_TEXT);
+			Toast.makeText(Splash.this, result, Toast.LENGTH_LONG).show();
+			((TextView)findViewById(R.id.userName)).setText(result);
+			login=false;
 			break;
 		}
 		}		

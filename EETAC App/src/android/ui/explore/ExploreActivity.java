@@ -1,10 +1,14 @@
 package android.ui.explore;
 
+import java.util.ArrayList;
+
+import com.markupartist.android.widget.ActionBar;
 
 import android.app.TabActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.ui.R;
+import android.ui.restclient.Processor;
 import android.utils.MenuHelper;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -53,12 +57,16 @@ public class ExploreActivity extends TabActivity{
 		TabSpec specs = th.newTabSpec("tag1").setContent(i).setIndicator(buildIndicator("Nearby"));
 		th.addTab(specs);
 
-		i= new Intent(getBaseContext(), ExploreTabSelectionActivity.class);
+		i= new Intent(getBaseContext(), ExploreRecentsActivity.class);
 		specs = th.newTabSpec("tag2").setContent(i).setIndicator(buildIndicator("Recents"));
 		th.addTab(specs);
 
 		i= new Intent(getBaseContext(), ExploreFavoritesActivity.class);
 		specs = th.newTabSpec("tag3").setContent(i).setIndicator(buildIndicator("Favorites"));
 		th.addTab(specs);
+//		ArrayList<Integer> integers= new ArrayList<Integer>();
+//		integers.add(1);
+////		integers.add(2);
+//		Processor.i.getSites(integers);
 	}
 }

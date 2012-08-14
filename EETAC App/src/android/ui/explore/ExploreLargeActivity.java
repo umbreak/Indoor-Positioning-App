@@ -24,13 +24,17 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.ui.CustomDialog;
 import android.ui.R;
 import android.ui.adapters.CommentAdapter;
 import android.ui.adapters.ImageAdapter;
+import android.ui.adapters.CommentAdapter.ViewHolderComment;
+import android.ui.adapters.OnCustomClickListener;
 import android.ui.pojos.Comment;
 import android.ui.pojos.Picture;
 import android.ui.pojos.Site;
 import android.ui.restclient.Processor;
+import android.ui.twitter.TwitterUtils;
 import android.util.Log;
 import android.utils.ActualSite;
 import android.utils.MenuHelper;
@@ -67,7 +71,12 @@ import com.markupartist.android.widget.ActionBar.AbstractAction;
  * Performs the call of PUT_COMMENT action on PUTService
  * and handle the response by implementing onReceiveResult.*/
 
-public class ExploreLargeActivity extends ListActivity implements OnClickListener, MyResultReceiver.Receiver{
+public class ExploreLargeActivity extends ListActivity implements OnClickListener, MyResultReceiver.Receiver, OnCustomClickListener{
+	@Override
+	protected void onPause() {
+		mState.mReceiver.clearReceiver();
+		super.onPause();
+	}
 	final private String TAG="ExploreLargeActivity";
 	private CommentAdapter m_adapter;
 	private EditText textComments;
@@ -109,13 +118,20 @@ public class ExploreLargeActivity extends ListActivity implements OnClickListene
 		onRefreshClick = new RefreshClick();
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
+		textComments=(EditText)findViewById(R.id.addTextComment);
+		avatar = (ImageView)findViewById(R.id.avatar);
+		imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+		checkButton = (ToggleButton) findViewById(R.id.checkButton);
+
 		if (previousState) {
 			// Start listening for SyncService updates again
 			mState.mReceiver.setReceiver(this);
+			im_adapter=new ImageAdapter(this,mState.site.pictures,150,100);
 			ToolKit.updateRefreshStatus(mState.mSyncing);
 			fillShortSite();
 		} else {
 			mState = new State();
+			im_adapter=new ImageAdapter(this,mState.site.pictures,150,100);
 			//Receive the integer of the Site we want to display.
 			mState.site.id=getIntent().getExtras().getInt(GET_SITE);
 			mState.mReceiver.setReceiver(this);
@@ -125,16 +141,12 @@ public class ExploreLargeActivity extends ListActivity implements OnClickListene
 			setTitle("Explore");
 		}
 
-		MenuHelper.setActionBar(this, MenuHelper.ACTIONBAR_EXPLORE);
+		MenuHelper.setActionBar(this, MenuHelper.ACTIONBAR_EXPLORE_2);
 		MenuHelper.actionBar.setHomeAction(onRefreshClick);
 
-		textComments=(EditText)findViewById(R.id.addTextComment);
-		avatar = (ImageView)findViewById(R.id.avatar);
-		imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
 
 		//Gallery of images.
 		gallery = (Gallery) findViewById(R.id.gallery);
-		im_adapter=new ImageAdapter(this,mState.site.pictures,150,100);
 		gallery.setAdapter(im_adapter);
 
 		gallery.setOnItemClickListener(new OnItemClickListener() {
@@ -155,26 +167,11 @@ public class ExploreLargeActivity extends ListActivity implements OnClickListene
 
 			}
 		});
-		gallery.setOnItemSelectedListener(new OnItemSelectedListener() {
-
-			public void onItemSelected(AdapterView<?> parent, View view,
-					int position, long id) {
-				ImageView image=(ImageView)view;
-
-				System.out.println("EL TAG: " + image.getTag());
-			}
-
-			public void onNothingSelected(AdapterView<?> parent) {
-				// TODO Auto-generated method stub
-
-			}
-		});
 
 		getListView().setItemsCanFocus(true);
-		m_adapter = new CommentAdapter(this,R.layout.comments ,mState.site.comments);
+		m_adapter = new CommentAdapter(preferences.getInt(PREFS_USER_ID, 0), this,R.layout.comments ,mState.site.comments, this);
 		setListAdapter(this.m_adapter);
 
-		checkButton = (ToggleButton) findViewById(R.id.checkButton);
 		textManagment();
 		favoriteButtonManagment();
 	}
@@ -200,10 +197,9 @@ public class ExploreLargeActivity extends ListActivity implements OnClickListene
 		final Gson gson= new Gson();
 
 		//Get the list of favorite sites from Shared Preferences
-		final SharedPreferences prefs=getSharedPreferences(PREFS_FILE, 0);
-		final SharedPreferences.Editor editPrefs=prefs.edit();
+		final SharedPreferences.Editor editPrefs=preferences.edit();
 
-		String result=prefs.getString(PREFS_FAVORITES, "");
+		String result=preferences.getString(PREFS_FAVORITES, "");
 		if (!result.isEmpty()){
 			ArrayList<Integer> favorites=new ArrayList<Integer>();		
 			favorites=gson.fromJson(result,new TypeToken<ArrayList<Integer>>() {}.getType());
@@ -217,14 +213,13 @@ public class ExploreLargeActivity extends ListActivity implements OnClickListene
 			public void onClick(View v) {
 				Gson gson=new Gson();
 				ArrayList<Integer> fav=new ArrayList<Integer>();
-				String result=prefs.getString(PREFS_FAVORITES, "");
+				String result=preferences.getString(PREFS_FAVORITES, "");
 				if (!result.isEmpty())
-					fav=gson.fromJson(prefs.getString(PREFS_FAVORITES, ""),new TypeToken<ArrayList<Integer>>() {}.getType());
+					fav=gson.fromJson(preferences.getString(PREFS_FAVORITES, ""),new TypeToken<ArrayList<Integer>>() {}.getType());
 
 				if (favoriteButton.isChecked()) {
 					Toast.makeText(ExploreLargeActivity.this, "Site added to favorites", Toast.LENGTH_SHORT).show();
 					fav.add(mState.site.id);
-					System.out.println("Favoriteeees: " + fav);
 
 				} else {
 					Toast.makeText(ExploreLargeActivity.this, "Site deleted from favorites.", Toast.LENGTH_SHORT).show();
@@ -240,6 +235,8 @@ public class ExploreLargeActivity extends ListActivity implements OnClickListene
 
 	@Override
 	protected void onResume() {
+		ToolKit.i.recentsQueue.offer(mState.site.id);
+		mState.mReceiver.setReceiver(this);
 		MenuHelper.actionBar=(ActionBar) findViewById(R.id.actionbar);
 		if (preferences.getBoolean(UPDATE_ALWAYS, false))
 			onRefreshClick.performAction(null);
@@ -289,7 +286,7 @@ public class ExploreLargeActivity extends ListActivity implements OnClickListene
 	private class RefreshClick extends AbstractAction {
 
 		public RefreshClick() {
-			super(R.drawable.ic_menu_mapmode);
+			super(R.drawable.ic_title_refresh_default);
 		}
 		public void performAction(View view) {
 			ToolKit.updateRefreshStatus(mState.mSyncing);
@@ -342,7 +339,6 @@ public class ExploreLargeActivity extends ListActivity implements OnClickListene
 		if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
 			if (resultCode == RESULT_OK) {
 				//					final File file = getTempFile(this);
-				//				System.out.println(file.getAbsoluteFile());
 				if (currentPhotoPath != null){
 
 					ToolKit.updateRefreshStatus(mState.mSyncing);
@@ -363,27 +359,21 @@ public class ExploreLargeActivity extends ListActivity implements OnClickListene
 	}
 
 	private void setAndResizeCorrectly(ImageView view, Bitmap bitmap){
-		System.out.println("ImageView size="+view.getLayoutParams().width+"x"+view.getLayoutParams().height );
-		System.out.println("Bitmap size=" + bitmap.getWidth() + "x" + bitmap.getHeight());
-		float new_y=view.getLayoutParams().width*bitmap.getHeight()/bitmap.getWidth();
-		System.out.println("final size=" + view.getLayoutParams().width + "x" + new_y);
-		
 
 		BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-//		float a=(float)bitmap.getWidth()/(float)view.getLayoutParams().width;
-//		float b=(float)bitmap.getHeight()/(float)180;
-//		System.out.println("sin redondear=" + a + " redondeando=" + Math.round(a));
-//		System.out.println("sin redondear=" + b + " redondeando=" + Math.round(b));
+
 		int scaleFactor=Math.round(Math.max((float)bitmap.getWidth()/100, (float)bitmap.getHeight()/100));
-		System.out.println("Scale factor=" + scaleFactor);
 		bmOptions.inJustDecodeBounds = false;
 		bmOptions.inSampleSize = scaleFactor;
 		bmOptions.inPurgeable = true;
+
 		bitmap=BitmapFactory.decodeFile(ToolKit.i.cacheDir + "/" + mState.site.route_image.substring(mState.site.route_image.lastIndexOf('/') + 1), bmOptions);
 		view.setImageBitmap(bitmap);
+		im_adapter.notifyDataSetChanged();
 
-//		if (view.getLayoutParams().height != Math.round(new_y))
-//			view.setLayoutParams(new LinearLayout.LayoutParams(view.getLayoutParams().width, Math.round(new_y)));
+
+		//		if (view.getLayoutParams().height != Math.round(new_y))
+		//			view.setLayoutParams(new LinearLayout.LayoutParams(view.getLayoutParams().width, Math.round(new_y)));
 	}
 
 	//Add the comment if the resultCode is positive (the resultCode is the comment_id)
@@ -410,7 +400,7 @@ public class ExploreLargeActivity extends ListActivity implements OnClickListene
 	private void addComment(){
 		imm.hideSoftInputFromWindow(textComments.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);	
 		if (!textComments.getText().toString().equals("")){
-			Comment c= new Comment(PreferenceManager.getDefaultSharedPreferences(this).getString(PREFS_USER, ""),textComments.getText().toString(), "", 0);
+			Comment c= new Comment(preferences.getString(PREFS_USER, ""),textComments.getText().toString(), "", 0);
 			ToolKit.updateRefreshStatus(mState.mSyncing);
 			Bundle b= new Bundle();
 			b.putParcelable(COMMENT_VAULE, c);
@@ -446,7 +436,6 @@ public class ExploreLargeActivity extends ListActivity implements OnClickListene
 
 			String lasCurrentPath=currentPhotoPath;
 			currentPhotoPath=currentPhotoPath.replaceFirst("IMG", "sIMG_");
-			System.out.println("Current Path: " + currentPhotoPath);
 			File compress_file = new File(currentPhotoPath);
 			OutputStream stream;
 			try {
@@ -480,16 +469,19 @@ public class ExploreLargeActivity extends ListActivity implements OnClickListene
 			fillShortSite();
 			im_adapter.notifyDataSetChanged();
 			im_adapter.pictures=mState.site.pictures;
-			im_adapter.notifyDataSetChanged();
 			ToolKit.updateRefreshStatus(mState.mSyncing);
 			gallery.setSelection(Math.abs(mState.site.pictures.size()/2), true);
+			im_adapter.notifyDataSetChanged();
 
 			break;
 		}
 		case STATUS_FINISHED_PICTURE_GET: { 
+			mState.mSyncing = false;
 			mState.bitmap=resultData.getParcelable(PICTURE_VALUE);
 			if (mState.bitmap != null)
 				setAndResizeCorrectly(avatar,mState.bitmap);
+
+			ToolKit.updateRefreshStatus(mState.mSyncing);
 			break;
 		}
 		case STATUS_FINISHED_COMMENT: {
@@ -504,7 +496,12 @@ public class ExploreLargeActivity extends ListActivity implements OnClickListene
 			if (mState.site.checkin_id > 0){
 				checkButton.setChecked(true);
 				findViewById(R.id.imageButton).setEnabled(true);
-				findViewById(R.id.commentLayout).setVisibility(View.VISIBLE);	
+				findViewById(R.id.commentLayout).setVisibility(View.VISIBLE);
+				if (preferences.getBoolean(TWITTER_NOTIFICATOINS, false))
+					try {
+						TwitterUtils.i.sendTweet(preferences, "Checkin in site: " + mState.site.name + " (from EETAC App)");
+					} catch (Exception e) {	}
+
 			}else if (mState.site.checkin_id==-2){
 				checkButton.setChecked(true);
 				Toast.makeText(this, "You are already Check-in.", Toast.LENGTH_LONG).show();
@@ -522,6 +519,10 @@ public class ExploreLargeActivity extends ListActivity implements OnClickListene
 				checkButton.setChecked(false);
 				findViewById(R.id.imageButton).setEnabled(false);
 				findViewById(R.id.commentLayout).setVisibility(View.GONE);	
+				if (preferences.getBoolean(TWITTER_NOTIFICATOINS, false))
+					try {
+						TwitterUtils.i.sendTweet(preferences, "Checkout in site: " + mState.site.name + " (from EETAC App)");
+					} catch (Exception e) {	}
 			}else{
 				Toast.makeText(this, "Problem while checkout.", Toast.LENGTH_LONG).show();
 				checkButton.setChecked(true);
@@ -543,7 +544,18 @@ public class ExploreLargeActivity extends ListActivity implements OnClickListene
 			mState.mSyncing = false;
 			ToolKit.updateRefreshStatus(mState.mSyncing);
 			break;
-		}		
+		}
+		case STATUS_FINISHED_DEL_COMMENT: {
+			int comment_pos=resultData.getInt(COMMENT_POSITION);
+			Comment c= m_adapter.getItem(comment_pos);
+			m_adapter.notifyDataSetChanged();
+			m_adapter.remove(c);
+			m_adapter.notifyDataSetChanged();
+
+			mState.mSyncing = false;
+			ToolKit.updateRefreshStatus(mState.mSyncing);
+			break;
+		}
 		case STATUS_ERROR: {
 			// Error happened down in SyncService, show as toast.
 			mState.mSyncing = false;
@@ -552,5 +564,19 @@ public class ExploreLargeActivity extends ListActivity implements OnClickListene
 			break;
 		}
 		}		
+	}
+	public void OnCustomClick(View v, int position) {
+		if (v.getId() == R.id.deleteButton){
+			int comment_id=(Integer)v.getTag();
+			Bundle b= new Bundle();
+			b.putInt(COMMENT_VAULE, comment_id);
+			b.putInt(COMMENT_POSITION, position);
+			ServiceHelper.startAction(DEL_COMMENT, String.valueOf(mState.site.id), b, mState.mReceiver, getApplicationContext());		
+		}
+		else{
+			ViewHolderComment holder=(ViewHolderComment)v.getTag();
+			CustomDialog.showDialog(this, holder.author.getText().toString(),  holder.text.getText().toString(), 0);
+		}
+
 	}
 }

@@ -2,15 +2,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
-        android:id="@+id/menuMap"
-        android:icon="@android:drawable/ic_menu_mapmode"
+        android:id="@+id/menuLogout"
+        android:icon="@android:drawable/ic_menu_set_as"
         android:numericShortcut="1"
-        android:title="@string/menu_map">
-    </item>
-    <item
-        android:id="@+id/menuCheck"
-        android:icon="@android:drawable/ic_menu_mylocation"
-        android:title="@string/menu_check">
+        android:title="Logout">
     </item>
     <item
         android:id="@+id/menuProf"
@@ -18,9 +13,9 @@
         android:title="@string/menu_prof">
     </item>
     <item
-        android:id="@+id/menuExplore"
-        android:icon="@android:drawable/ic_menu_search"
-        android:title="@string/menu_explore">
+        android:id="@+id/menuExit"
+        android:icon="@android:drawable/ic_lock_power_off"
+        android:title="Exit">
     </item>
 
 </menu>

@@ -36,12 +36,10 @@ public class ImageManager implements MyResultReceiver.Receiver{
 	private MyResultReceiver receiver;
 	private String short_url;
 	private Context context;
-	int mGalleryItemBackground;
 
 	public ImageManager(Context c) {
 		super();
 		context=c;
-		this.mGalleryItemBackground=mGalleryItemBackground;
 		//Creating Directory for saving images
 		receiver=new MyResultReceiver(new Handler());
 		receiver.setReceiver(this);
@@ -110,9 +108,9 @@ public class ImageManager implements MyResultReceiver.Receiver{
 			imageView=i;
 		}
 		public void run() {
-			if(bitmap != null)
+			if(bitmap != null){
 				setAndResizeCorrectly(imageView,bitmap);
-			else
+			}else
 				imageView.setImageResource(R.drawable.downloading);
 		}
 	}

@@ -1,9 +1,13 @@
 package android.ui.map;
 import static android.utils.Actions.GET_SITE;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -22,6 +26,7 @@ import android.ui.pojos.ShortSite;
 import android.util.Log;
 import android.utils.MenuHelper;
 import android.utils.MyResultReceiver;
+import android.utils.ToolKit;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.Menu;
@@ -37,6 +42,7 @@ import com.ericsson.android.indoormaps.ItemizedOverlay;
 import com.ericsson.android.indoormaps.MapController;
 import com.ericsson.android.indoormaps.MapController.LoadingListener;
 import com.ericsson.android.indoormaps.MapController.MapItemOnFocusChangeListener;
+import com.ericsson.android.indoormaps.MapController.LoadingListener.LoadingState;
 import com.ericsson.android.indoormaps.MapManager;
 import com.ericsson.android.indoormaps.MapView;
 import com.ericsson.android.indoormaps.MyLocationOverlay;
@@ -49,6 +55,7 @@ import com.ericsson.android.indoormaps.location.IndoorLocationProvider.IndoorLoc
 import com.ericsson.android.indoormaps.routing.DefaultRoutingService;
 import com.ericsson.indoormaps.model.GeoPoint;
 import com.ericsson.indoormaps.model.Location;
+import com.ericsson.indoormaps.model.MapDescription;
 import com.ericsson.indoormaps.model.MapItem;
 import com.ericsson.indoormaps.model.Node;
 import com.ericsson.indoormaps.model.Point;
@@ -76,6 +83,7 @@ public class MapActivity extends IndoorMapActivity implements LoadingListener,
 	private static final int C4_THIRD_FLOOR_MAP_ID = 0;//21
 	
 	ItemizedOverlay overlayOfRoomNames = null;
+	private int styleId = 132;
 	
 
 	private static final int EXAMPLE_STYLE_ID = 132;//1
@@ -97,6 +105,7 @@ public class MapActivity extends IndoorMapActivity implements LoadingListener,
 	private ImageButton prev_button;
 	private Button Change_floor_button;
 
+	private ActionBar actionBar;
 
 
  
@@ -137,19 +146,22 @@ public class MapActivity extends IndoorMapActivity implements LoadingListener,
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.map);
 
-		// layout assignation
+		//Set Action Bar
+		MenuHelper.setActionBar(this, MenuHelper.ACTIONBAR_MAP);
+
+		//Layout assignation
 		setMapView((MapView) findViewById(R.id.indoor_map_view));
 		
 
 		//Controller
 		mMapController = getMapView().getMapController();
-		MenuHelper.setActionBar(this, MenuHelper.ACTIONBAR_MAP);
 		// Set listener to get callback when map and style is loading. Good
 		// thing to set before calling setMap/setStyle.
 		mMapController.setLoadingListener(this);
-		mMapController.setMap(C4_MALL_FLOOR_MAP_ID, API_KEY, true);
-		mMapController.setStyle(EXAMPLE_STYLE_ID, API_KEY, true);
-		
+		loadMap(C4_MALL_FLOOR_MAP_ID);
+		//mMapController.setMap(C4_MALL_FLOOR_MAP_ID, API_KEY, true);
+		//mMapController.setStyle(EXAMPLE_STYLE_ID, API_KEY, true);
+    	//startLoading(LoadStates.LOADING_MAP);
 		
 		
 		// Display zoom controls
@@ -180,7 +192,9 @@ public class MapActivity extends IndoorMapActivity implements LoadingListener,
 		
 		// Add Location button in actionBar
 		GetLocationClick onGetLocationClick = new GetLocationClick();
-		MenuHelper.actionBar.setHomeAction(onGetLocationClick);
+		actionBar=(ActionBar) findViewById(R.id.actionbar);
+		actionBar.setHomeAction(onGetLocationClick);
+		//MenuHelper.actionBar.setHomeAction(onGetLocationClick);
 		
 
 
@@ -207,15 +221,6 @@ public class MapActivity extends IndoorMapActivity implements LoadingListener,
 			
 			
 				});
-		/*
-		mRouteButton = (ImageButton) findViewById(R.id.buttonRoute);
-		mRouteButton.setOnClickListener(this);
-		findViewById(R.id.buttonNext).setOnClickListener(this);
-		findViewById(R.id.buttonPrev).setOnClickListener(this);
-		findViewById(R.id.buttonLocation).setOnClickListener(this);
-		findViewById(R.id.buttonTest).setOnClickListener(this);
-		*/	
-		
 	}
 	
 	
@@ -225,6 +230,7 @@ public class MapActivity extends IndoorMapActivity implements LoadingListener,
 	 * @param ShortSite
 	 */
 	protected void onResume() {
+		
 		MenuHelper.actionBar=(ActionBar) findViewById(R.id.actionbar);
 		super.onResume();
 	}
@@ -237,7 +243,12 @@ public class MapActivity extends IndoorMapActivity implements LoadingListener,
 		//HashMap allow to define the keys for looking a site in the Map.
 		final HashMap<String, String> withTags2 = new HashMap<String, String>();
 		withTags2.put("room:id", String.valueOf(site.id));
-		final List<MapItem> mapSite = MapManager.getMapItems(withTags2, C4_MALL_FLOOR_MAP_ID, this);
+		List<MapItem> mapSite = MapManager.getMapItems(withTags2, C4_MALL_FLOOR_MAP_ID, this);
+		
+		//May be the site is in the first floor
+		if (mapSite.isEmpty()) 
+			mapSite = MapManager.getMapItems(withTags2, C4_FIRST_FLOOR_MAP_ID, this);
+
 		
 		//Map<String, String> tags = mapSite.get(0).getTags();
 		//toast("The room id is "+tags.get("room:id"));
@@ -322,8 +333,9 @@ public class MapActivity extends IndoorMapActivity implements LoadingListener,
 					mapID = C4_THIRD_FLOOR_MAP_ID;
 					break;
 		    	}
-				mMapController.setMap(mapID, API_KEY, true);
-				mMapController.setStyle(EXAMPLE_STYLE_ID, API_KEY, true);
+				loadMap(mapID);
+				//mMapController.setMap(mapID, API_KEY, true);
+				//mMapController.setStyle(EXAMPLE_STYLE_ID, API_KEY, true);
 
 
 		    }
@@ -340,6 +352,7 @@ public class MapActivity extends IndoorMapActivity implements LoadingListener,
 	 */
 	/*
 	public void testClick(View v) {
+
 		toast("Check logcat output to see what happens here");
 		// Find rooms and set them selected.
 		final HashMap<String, String> withTags = new HashMap<String, String>();
@@ -400,18 +413,134 @@ public class MapActivity extends IndoorMapActivity implements LoadingListener,
 	}
 	*/
 
+	/*
+	 * Loading States
+	 */
+	// --- LOADING STUFF ------------------------------------
+		private boolean mLoading;
+		public void setLoading(boolean loading) {
+			this.mLoading = loading;
+		}
+		boolean isLoading() {
+			return mLoading;
+		}
+		/*
+		private void setLoadingSubText(String txt) {
+			TextView subText = (TextView)findViewById(R.id.title_loading_subtext);
+			if(subText!=null) {
+				subText.setText(txt);
+			}
+		}
+		*/
+		
+		//Permite escribir en el action bas
+		private void setTitleActionBar (String txt) {
+			actionBar=(ActionBar) findViewById(R.id.actionbar);
+			actionBar.setTitle(txt);
+		}
+		
+		// loader
+		private enum LoadStates { LOADING_MAP, LOADING_STYLE, LOADING_ROUTE, LOADING_LOCATION }
+		private String loadstateToString(final LoadStates state) {
+			switch(state) {
+			case LOADING_ROUTE:		return "Calculating route";
+			case LOADING_STYLE:		return "Loading style";
+			case LOADING_MAP:		return "Loading map";
+			case LOADING_LOCATION:	return "Requesting location";
+			default:				return "Unknown state";
+			}
+		}
+		private ArrayList<LoadStates> loadingState = new ArrayList<LoadStates>();
+		private void startLoading(final LoadStates state) {
+			if(!loadingState.contains(state)) {
+				loadingState.add(state);
+				
+				if(state==LoadStates.LOADING_MAP) {
+					showMap(false);
+				}
+			}
+			updateLoading();
+		}
+		private void stopLoading(final LoadStates state) {
+			if(loadingState.contains(state)) {
+				loadingState.remove(state);
+				
+				if(state==LoadStates.LOADING_MAP) {
+					showMap(true);
+				}
+			}
+			updateLoading();
+		}
+		
+		private void updateLoading() {
+			if(loadingState.size()>0) {
+				if(!isLoading()) {
+					beginLoading();
+				}
+				
+				final StringBuffer b = new StringBuffer();
+				for(LoadStates state:loadingState) {
+					if(b.length()>0) {
+						b.append('\n');
+					}
+					b.append(loadstateToString(state));
+				}
+				//setLoadingSubText(b.toString());
+				//setTitleActionBar(b.toString());
+			} else {
+				if(isLoading()) {
+					endLoading();
+				}
+			}
+		}
+		
+		private void beginLoading() {
+			
+			/*
+			if(mSpinnerFloorName!=null) {
+				mSpinnerFloorName.setVisibility(View.GONE);
+			}
+			*/
+			setLoading(true);
+			TitleBarHelper.enableProgress(this); 
+			
+		}
+		private void endLoading() {
+			/*
+			if(mSpinnerFloorName!=null) {
+				mSpinnerFloorName.setVisibility(View.VISIBLE);
+			}
+			*/
+			setLoading(false);
+			TitleBarHelper.disableProgress(this);
+		}
+
+		private void showMap(boolean bShow) {
+			View v = (View)findViewById(R.id.indoor_map_view);
+			if(v!=null) {
+				if(bShow) {
+					v.setVisibility(View.VISIBLE);
+				} else {
+					v.setVisibility(View.GONE);
+				}
+			}		
+		}
+		// --- LOADING STUFF END --------------------------------
+	
 	/**
 	 * Request location button clicked.
 	 * 
 	 * @param v
 	 */
 	public void requestLocation() {
+		
 		// Setup Indoor Location API and request a location
 		IndoorLocationProvider locationProvider = new IndoorLocationProvider();
 		IndoorLocationListener locationListener = new IndoorLocationListener() {
 
 			public void onIndoorLocation(double latitude, double longitude,
 						int buildingId, int floorId, int horizontalAccuracy) {
+				
 				
 				GeoPoint geoPoint = new GeoPoint(latitude, longitude);
 				geoPoint.setBuildingId(buildingId);
@@ -427,12 +556,16 @@ public class MapActivity extends IndoorMapActivity implements LoadingListener,
 				}
 				Log.d(LOG_TAG,"MapActivity.doThings(...).new IndoorLocationHandler() {...}.onIndoorLocation() - "+ geoPoint);
 				toast("Location received: " + geoPoint);
+				ToolKit.updateRefreshStatus(false);
+
 			}
 
 			public void onError(IndoorLocationRequestStatus status,
 					String message) {
 				Log.d(LOG_TAG,"MapActivity.doThings(...).new IndoorLocationHandler() {...}.onError() - "+ message + " status: " + status);
 				toast("Location not found: " + message);
+				ToolKit.updateRefreshStatus(false);
+
 			}
 		};
 		locationProvider.requestIndoorLocation(locationListener, this, API_KEY);
@@ -583,10 +716,8 @@ public class MapActivity extends IndoorMapActivity implements LoadingListener,
 				// Get canvas coordinates from map coordinates with help from
 				// projection
 				Projection projection = mapView.getProjection();
-				float canvasX = projection.getCanvasCoord(focusedMapItem
-						.getCenter().getX());
-				float canvasY = projection.getCanvasCoord(focusedMapItem
-						.getCenter().getY());
+				float canvasX = projection.getCanvasCoord(focusedMapItem.getCenter().getX());
+				float canvasY = projection.getCanvasCoord(focusedMapItem.getCenter().getY());
 
 				// Draw circle in the center of focused item
 				Paint p = new Paint();
@@ -604,19 +735,18 @@ public class MapActivity extends IndoorMapActivity implements LoadingListener,
 				// Calculate the map coordinates for the long pressed pixel
 				// coordinate
 				Projection p = mTouchedMapView.getProjection();
-				Point point = new Point(p.getMapX(e.getX()),
-						p.getMapY(e.getY()));
+				Point point = new Point(p.getMapX(e.getX()), p.getMapY(e.getY()));
 
 				// Create a Location object for MyLocation set by the long press
 				// and att it to MyLocationOverlay
-				Location myFakeLocation = new Location(point, getMapView()
-						.getBuildingId(), getMapView().getFloorId());
+				Location myFakeLocation = new Location(point, getMapView().getBuildingId(), getMapView().getFloorId());
 
 				addMyLocationOverlayIfMissing();
 
 				mMyLocationOverlay.setLocation(myFakeLocation);
 				mMyLocationOverlay.setShowAccuracy(false);
 				mTouchedMapView.invalidate();
+				
 				// Some tactile feedback
 				Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 				v.vibrate(100);
@@ -653,12 +783,136 @@ public class MapActivity extends IndoorMapActivity implements LoadingListener,
 		}
 	}
 	
+   
+	
+	private void loadMap(int mapId) {
+    	startLoading(LoadStates.LOADING_MAP);
+    	//setCurrentMapDescription(desc);
+    	//setTitle(desc.getName());
+    	getMapView().getMapController().setMap(mapId, API_KEY, true);
+		getMapView().getMapController().setStyle(styleId, API_KEY, true);
+
+    }
+	
+	/*
+	 * (non-Javadoc)
+	 * @see com.ericsson.android.indoormaps.MapController.LoadingListener#onMapLoading(com.ericsson.android.indoormaps.MapController.LoadingListener.LoadingState, int, java.lang.String)
+	 */
+	public void onMapLoading(LoadingState state, int mapId, String message) {
+		//setLoadingSubText(message);
+		
+		switch(state) {
+		case DOWNLOADING:	break;
+		case CACHING:		break;
+		case FROM_CACHE:	break;
+		case NEW_VERSION:	break;
+		case ERROR:			
+			onMapError(mapId, message);
+			break;
+		case FINISHED:
+			onMapLoaded(mapId, message);
+			break;
+		}
+	}
+	
+	private void onMapLoaded(int mapId, String message) {
+    	stopLoading(LoadStates.LOADING_MAP);
+    	
+/*/
+    	if(mapId>0) {
+    		final IBuilding currentBuilding = BuildingHandler.getInstance().getBuildingForMapId(mapId);
+    		initFloorSpinner(currentBuilding.getBuildingId());
+    		
+    		setTitleFromMapID(currentBuilding, mapId);
+    		
+    		mBubbleOverlay = new BubbleOverlay(getMapView());
+    		getMapView().getMapController().getOverlays().add(mBubbleOverlay);
+    		
+    		mBubbleOverlay.setClickListener(this);
+    
+    		if(mMyLocationOverlay!=null) {
+    			final Location layerLocation = mMyLocationOverlay.getLocation();
+    			
+    			// Check if the layerlocation is on the loaded map. If not hide the layer
+    			if(layerLocation!=null) {
+    				if(getMapView().getBuildingId()==layerLocation.getBuildingId() && getMapView().getFloorId()==layerLocation.getFloorId()) {
+    					mMyLocationOverlay.setVisible(true);
+    					checkRoomRouting();
+    				} else {
+    					mMyLocationOverlay.setVisible(false);
+    				}	
+    			} else {
+    				mMyLocationOverlay.setVisible(false); 
+    			}		
+
+    		} else {
+    			mMyLocationOverlay = new MyLocationOverlay();
+    		}
+    		
+    		getMapView().getMapController().getOverlays().add(mMyLocationOverlay);
+    		getMapView().getMapController().getOverlays().add(new CustomOverlay());
+    	
+    	} else {
+    		showDialog("Error!", "Error loading map (mapId="+mapId+")");
+    	}
+   */
+    				// Get overlays
+    				List<Overlay> mapOverlays = mMapController.getOverlays();
+
+    				// Give example of how to use Projection to get map coordinates for
+    				// a latitude, longitude coordinate.
+    				showCaseProjection();
+
+    				// CustomOverlay that draws a circle and handles touch input
+    				// We want only one instance of it in the mapview
+    				CustomOverlay customOverlay = null;
+    				for (Overlay o : mapOverlays) {
+    					if (o instanceof CustomOverlay) {
+    						customOverlay = (CustomOverlay) o;
+    						break;
+    					}
+    				}
+    				mapOverlays.remove(customOverlay);
+    				mapOverlays.add(new CustomOverlay());
+    				
+    				//Cath the extra info of Intents
+    				Log.d(LOG_TAG, "onMapLoading() - Before getSite: ");
+    				ShortSite site = getIntent().getParcelableExtra(GET_SITE);
+    				
+    				if (site != null) {
+    					Log.d(LOG_TAG, "onMapLoading() -  After getSite. -> site : " +site.name);
+    					fromMyLocationTo(site);
+    				}
+    				
+    				addOverlayOfRoomNames(mapId);
+    }
+	
+	 private void onMapError(int mapId, String message) {
+	    	stopLoading(LoadStates.LOADING_MAP);
+	    	showDialog("Error!", "Error loading map\n"+message+"\n(mapId="+mapId+")");
+	    }
+	 
+	 void showDialog(String title, String description) {
+			final AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+			dialog.setTitle(title);
+			dialog.setMessage(description);
+			dialog.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.dismiss();
+				}
+			});
+			dialog.show();
+		}
+	
 /*
  * (non-Javadoc)
  * @see com.ericsson.android.indoormaps.MapController.LoadingListener#onMapLoading(com.ericsson.android.indoormaps.MapController.LoadingListener.LoadingState, int, java.lang.String)
  */
+	/*
 	public void onMapLoading(LoadingState state, int mapId, String message) {
 		Log.d(LOG_TAG, "MapActivity.onMapLoading() - state: " + state + ", message: " + message);
+    	
+		startLoading(LoadStates.LOADING_MAP);
 
 		switch (state) {
 		case FINISHED:
@@ -701,6 +955,7 @@ public class MapActivity extends IndoorMapActivity implements LoadingListener,
 			break;
 		}
 	}
+	*/
 
 	/*
 	 * (non-Javadoc)
@@ -920,9 +1175,11 @@ public class MapActivity extends IndoorMapActivity implements LoadingListener,
     private class GetLocationClick extends AbstractAction {
 
         public GetLocationClick() {
-            super(R.drawable.ic_menu_location);
+        	
+            super(R.drawable.ic_menu_myplaces);
         }
         public void performAction(View view) {
+			ToolKit.updateRefreshStatus(true);
         	requestLocation();
         }
 

@@ -11,7 +11,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.ui.R;
+import android.ui.adapters.SiteAdapter;
 import android.ui.map.MapActivity;
 import android.ui.pojos.ShortSite;
 import android.util.Log;
@@ -43,12 +45,10 @@ import com.markupartist.android.widget.ActionBar.AbstractAction;
 public class ExploreFavoritesActivity extends ListActivity implements MyResultReceiver.Receiver{
 
 	private SiteAdapter m_adapter;
-	private Intent longSiteIntent;
 	private State mState;
 	private ActionBar actionBar;
 	private ArrayList<Integer> favorites;
 	private SharedPreferences prefs;
-	private SharedPreferences.Editor editPrefs;
 	private final Gson gson= new Gson();
 	private RefreshClick onRefreshClick;
 	private Context context;
@@ -61,20 +61,13 @@ public class ExploreFavoritesActivity extends ListActivity implements MyResultRe
 		context=this;
 
 		favorites=new ArrayList<Integer>();	
-		
+		prefs=PreferenceManager.getDefaultSharedPreferences(this);
+
 		mState = (State) getLastNonConfigurationInstance();
 		onRefreshClick = new RefreshClick();
 		MenuHelper.actionBar.setHomeAction(onRefreshClick);
-		
+
 		//Get list of favorites	
-		prefs=getSharedPreferences(PREFS_FILE, 0);
-		editPrefs=prefs.edit();
-		String result=prefs.getString(PREFS_FAVORITES, "");
-		if (!result.isEmpty()){
-			favorites=gson.fromJson(result,new TypeToken<ArrayList<Integer>>() {}.getType());
-			Log.d("ExploreFavoritesActivity", "Favorites sites: " + favorites.toString());
-		}
-		
 
 		final boolean previousState = mState != null;
 		if (previousState) {
@@ -84,7 +77,7 @@ public class ExploreFavoritesActivity extends ListActivity implements MyResultRe
 		} else {
 			mState = new State();
 			mState.mReceiver.setReceiver(this);
-//			onRefreshClick.performAction(null);
+			//			onRefreshClick.performAction(null);
 		}
 
 		getListView().setItemsCanFocus(true);
@@ -99,7 +92,7 @@ public class ExploreFavoritesActivity extends ListActivity implements MyResultRe
 		private Bundle type;
 
 		public RefreshClick() {
-			super(R.drawable.icon);
+			super(R.drawable.ic_title_refresh_default);
 			type= new Bundle();
 			type.putBoolean(SITE_SHORT, true);
 
@@ -107,10 +100,12 @@ public class ExploreFavoritesActivity extends ListActivity implements MyResultRe
 		public void performAction(View view) {
 			ToolKit.updateRefreshStatus(mState.mSyncing);
 			mState.listSites.clear();
-			
-			for (Integer site_id: favorites){
-				ServiceHelper.startAction(GET_SITE, String.valueOf(site_id), type, mState.mReceiver,context);
+			if (favorites.size()>0){
+				Bundle b = new Bundle();
+				b.putIntegerArrayList(SITE_VAULE, favorites);
+				ServiceHelper.startAction(POST_SITES,b,mState.mReceiver,getApplicationContext());
 			}
+
 		}
 	}
 
@@ -121,12 +116,18 @@ public class ExploreFavoritesActivity extends ListActivity implements MyResultRe
 		mState.mReceiver.clearReceiver();
 		return mState;
 	}
-
+	@Override
+	protected void onPause() {
+		mState.mReceiver.clearReceiver();
+		super.onPause();
+	}
 	@Override
 	protected void onResume() {
+
+		mState.mReceiver.setReceiver(this);
 		MenuHelper.actionBar=actionBar;
 		MenuHelper.actionBar.setHomeAction(onRefreshClick);
-		
+
 		//Get list of favorites	
 		String result=prefs.getString(PREFS_FAVORITES, "");
 		if (!result.isEmpty()){
@@ -155,9 +156,13 @@ public class ExploreFavoritesActivity extends ListActivity implements MyResultRe
 			break;
 		}
 		case STATUS_FINISHED: {
-			mState.listSites.add(ActualSite.shortSite);
+			ShortSite[] s= (ShortSite[])resultData.getParcelableArray(GET_SITES);
+			m_adapter.notifyDataSetChanged();
+			mState.listSites.clear();
+			mState.listSites.addAll(Arrays.asList(s));	
 			m_adapter.notifyDataSetChanged();
 			//			runOnUiThread(returnRes);
+
 			mState.mSyncing = false;
 			ToolKit.updateRefreshStatus(mState.mSyncing);
 			break;
@@ -170,62 +175,5 @@ public class ExploreFavoritesActivity extends ListActivity implements MyResultRe
 			break;
 		}
 		}		
-	}
-
-	private class SiteAdapter extends ArrayAdapter<ShortSite>{
-
-		public ArrayList<ShortSite> items;
-
-		public SiteAdapter(Context context, int textViewResourceId, ArrayList<ShortSite> items) {
-			super(context, textViewResourceId, items);
-			this.items = items;
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			View v = convertView;
-			if (v == null) {
-				LayoutInflater vi = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				v = vi.inflate(R.layout.explore_site, null);
-			}
-			v.setClickable(true);
-			v.setFocusable(true);
-			v.setBackgroundResource(android.R.drawable.menuitem_background);
-			ShortSite o = items.get(position);
-			if (o != null) {
-
-				((TextView) v.findViewById(R.id.explore_site_name)).setText(o.name);
-				((TextView) v.findViewById(R.id.explore_site_description)).setText(o.description);
-				((TextView) v.findViewById(R.id.explore_site_comments)).setText(o.num_comments + " comments");
-				((TextView) v.findViewById(R.id.explore_site_checkins)).setText(o.num_checkins + " checkins");
-				//				((ImageView) v.findViewById(R.id.avatar)).setImageResource(o.avatar);
-				((ImageView) v.findViewById(R.id.avatar)).setImageResource(R.drawable.app_notes);
-				Button b=(Button) v.findViewById(R.id.goButton);
-				OnItemClickListener listener=new OnItemClickListener(position);
-				v.setOnClickListener(listener);
-				b.setOnClickListener(listener);
-			}
-			return v;
-		}
-		private class OnItemClickListener implements OnClickListener{           
-			private int mPosition;
-			OnItemClickListener(int position){
-				mPosition = position;
-			}
-			public void onClick(View arg0) {
-				if (arg0.getId() == R.id.goButton){
-					Intent i =new Intent(getBaseContext(), MapActivity.class);
-					i.putExtra(GET_SITE, mState.listSites.get(mPosition));
-					startActivity(i);
-				}else{
-					longSiteIntent= new Intent(getBaseContext(), ExploreLargeActivity.class);
-					//				Bundle extras= new Bundle();
-					//				extras.putParcelable("SITE", listSites.get(mPosition));
-					longSiteIntent.putExtra(GET_SITE, mState.listSites.get(mPosition).id);
-					startActivity(longSiteIntent);
-				}
-			}               
-		}
-
 	}
 }

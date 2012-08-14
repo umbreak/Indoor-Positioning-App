@@ -13,6 +13,8 @@ import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.ui.explore.ExploreActivity;
+import android.ui.explore.ExploreFavoritesActivity;
+import android.ui.pojos.User;
 import android.utils.MyResultReceiver;
 import android.utils.ServiceHelper;
 import android.view.KeyEvent;
@@ -33,18 +35,15 @@ import android.widget.Toast;
 
 public class RegisterActivity extends Activity implements OnClickListener, MyResultReceiver.Receiver{
 
-	private EditText name, user, pass, mail;
-	private String currentPhotoPath;
+	private EditText user, pass, mail;
 	private static MyResultReceiver mReceiver;
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.register);
-		name=(EditText)findViewById(R.id.nameReg);
 		user=(EditText)findViewById(R.id.usernameReg);
-		mail=(EditText)findViewById(R.id.emailReg);
 		pass=(EditText)findViewById(R.id.passReg);
-		currentPhotoPath=null;
+		mail=(EditText)findViewById(R.id.emailReg);
 		mReceiver = (MyResultReceiver) getLastNonConfigurationInstance();
 		final boolean previousState = mReceiver != null;
 
@@ -55,22 +54,23 @@ public class RegisterActivity extends Activity implements OnClickListener, MyRes
 			mReceiver=new MyResultReceiver(new Handler());
 			mReceiver.setReceiver(this);
 		}
+		pass.setOnKeyListener(new OnKeyListener() {
+			public boolean onKey(View v, int keyCode, KeyEvent event) {
+				// If the event is a key-down event on the "enter" button
+				if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
+						(keyCode == KeyEvent.KEYCODE_ENTER)) {
+					// Perform action on key press
+					register();	
+					return true;
+				}
+				return false;
+			}
+		});
 	}
 
 	public void onClick(View v) {
 		if (v.getId() == R.id.loginButton){
-			if (name.getText().toString().isEmpty())
-				Toast.makeText(this, "Fill the Name field.", Toast.LENGTH_SHORT).show();
-			else if (user.getText().toString().isEmpty())
-				Toast.makeText(this, "Fill the Username field.", Toast.LENGTH_SHORT).show();
-			else if (mail.getText().toString().isEmpty())
-				Toast.makeText(this, "Fill the Email field.", Toast.LENGTH_SHORT).show();
-			else if (pass.getText().toString().isEmpty())
-				Toast.makeText(this, "Fill the Password field.", Toast.LENGTH_SHORT).show();
-			else if (mail.getText().toString().isEmpty())
-				Toast.makeText(this, "Fill the Name field.", Toast.LENGTH_SHORT).show();
-			else
-				register();
+			register();
 		}else if (v.getId() == R.id.loadImageReg){
 			Intent intent = new Intent(Intent.ACTION_PICK,
 					android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
@@ -79,15 +79,22 @@ public class RegisterActivity extends Activity implements OnClickListener, MyRes
 
 	}
 	private void register(){
-		startActivity(new Intent(this, LoginActivity.class));
-//		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-//		imm.hideSoftInputFromWindow(pass.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);	
-//
-//		SharedPreferences.Editor editPrefs = PreferenceManager.getDefaultSharedPreferences(this).edit();
-//		editPrefs.putString(PREFS_USER, user.getText().toString());
-//		editPrefs.putString(PREFS_PASS, pass.getText().toString());
-//		editPrefs.commit();
-		//		ServiceHelper.startAction(POST_LOGIN, mReceiver,getApplicationContext());
+		if (user.getText().toString().isEmpty())
+			Toast.makeText(this, "Fill the Username field.", Toast.LENGTH_SHORT).show();
+		else if (pass.getText().toString().isEmpty())
+			Toast.makeText(this, "Fill the Password field.", Toast.LENGTH_SHORT).show();
+		else{
+			User newUser= new User(user.getText().toString(), pass.getText().toString());
+			newUser.email=mail.getText().toString();
+			Bundle b = new Bundle();
+			b.putParcelable(USER_VAULE, newUser);
+			SharedPreferences.Editor localPrefs=PreferenceManager.getDefaultSharedPreferences(this).edit();
+			localPrefs.putInt(PREFS_TWITTER_ID, 0);
+			localPrefs.commit();
+			ServiceHelper.startAction(PUT_USER, b, mReceiver,getApplicationContext());
+
+		}
+
 	}
 
 	@Override
@@ -98,42 +105,22 @@ public class RegisterActivity extends Activity implements OnClickListener, MyRes
 		return mReceiver;
 	}
 
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		// TODO Auto-generated method stub
-		super.onActivityResult(requestCode, resultCode, data);
-
-		if (resultCode == RESULT_OK){
-			currentPhotoPath=data.getData().toString();
-			System.out.println("Image to Load: " + currentPhotoPath);
-		}
-	}
-
-
 	public void onReceiveResult(int resultCode, Bundle resultData) {
 		switch (resultCode) {
 		case STATUS_RUNNING: {
 			break;
 		}
 		case STATUS_FINISHED: {
-			int result=Integer.valueOf(resultData.getString(POST_LOGIN));
-			if (result>=0){
-				SharedPreferences.Editor editor=getSharedPreferences(PREFS_FILE, 0).edit();
-				editor.putInt(PREFS_USER_ID, result);
-				editor.commit();
-				startActivity(new Intent(getBaseContext(), ExploreActivity.class));
-				finish();
-			} else if (result == -1)
-				Toast.makeText(RegisterActivity.this, "User not found or password incorrect", Toast.LENGTH_LONG).show();
-
-			else{
-				Toast.makeText(RegisterActivity.this, "No response from the server " + PreferenceManager.getDefaultSharedPreferences(this).getString(PREFS_SERVER, null),  Toast.LENGTH_LONG).show();
-
-			}
+			SharedPreferences.Editor editPrefs = PreferenceManager.getDefaultSharedPreferences(this).edit();
+			editPrefs.putString(PREFS_USER, user.getText().toString());
+			editPrefs.putString(PREFS_PASS, pass.getText().toString());
+			editPrefs.commit();
+			startActivity(new Intent(this, ExploreActivity.class));
 			break;
+
 		}
 		case STATUS_ERROR: {
-			Toast.makeText(RegisterActivity.this, "Error in the authentication process", Toast.LENGTH_LONG).show();
+			Toast.makeText(this, resultData.getString(Intent.EXTRA_TEXT), Toast.LENGTH_LONG).show();
 			break;
 		}
 		}		

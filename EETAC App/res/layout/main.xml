@@ -160,11 +160,12 @@
             android:orientation="vertical" >
 
             <ImageView
-                android:id="@+id/imageView3"
+                android:id="@+id/twitter_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:src="@drawable/twitter_login" />
+                android:onClick="onClick"
+                android:src="@drawable/twitter_btn" />
 
             <TextView
                 android:id="@+id/TextView01"

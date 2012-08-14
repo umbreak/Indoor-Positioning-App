@@ -12,10 +12,32 @@
     <include
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        layout="@layout/buttons" />
+        layout="@layout/buttons" android:id="@+id/include1"/>
 
     <com.markupartist.android.widget.ActionBar
         android:id="@+id/actionbar"
         style="@style/ActionBar" />
+        
+    <ProgressBar android:id="@+id/map_loading_progress"
+     style="?android:attr/progressBarStyleLarge"
+      android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_centerVertical="true"
+       android:layout_centerHorizontal="true">
+           </ProgressBar>
+           
+    <TextView android:id="@+id/title_loading"
+     android:layout_width="wrap_content"
+     android:textColor="#ff555555"   
+	 android:textStyle="bold"
+     android:textSize="18dp"
+     android:text="Loading"
+     android:layout_height="wrap_content"
+     android:layout_centerVertical="true"
+	 android:layout_below="@id/map_loading_progress"
+	 android:layout_centerHorizontal="true">
+      </TextView>
+         
+         
 
 </RelativeLayout>

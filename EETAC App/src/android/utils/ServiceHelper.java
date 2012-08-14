@@ -17,9 +17,15 @@ public class ServiceHelper {
 	//	private static final String LOG = ServiceHelper.class.getName();
 	private ServiceHelper() {
 	}
-
+	
+	public synchronized static boolean startAction(String action, Context c) {
+		return startAction(action, null, null, null, null, c);
+	}
 	public synchronized static boolean startAction(String action, MyResultReceiver receiver, Context c) {
 		return startAction(action, null, null, null, receiver, c);
+	}
+	public synchronized static boolean startAction(String action, Bundle extras,MyResultReceiver receiver, Context c) {
+		return startAction(action, null, null, extras, receiver, c);
 	}
 	public synchronized static boolean startAction(String action, String site, MyResultReceiver receiver, Context c) {
 		return startAction(action, site, null, null, receiver, c);

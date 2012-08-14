@@ -17,12 +17,15 @@ import android.widget.ImageView;
 //Class with static methods that could be reached from any Acitivity, if it's needed.
 public enum ToolKit {
 	i;
+	public int MAX_ELEMS=8;
 	public Context context;
 	private MessageDigest digest=null;
 	public File cacheDir;
+	public LastSeenQueue<Integer> recentsQueue;
 	private ToolKit(){
 		try {
 			digest = MessageDigest.getInstance("SHA-256");
+			recentsQueue=new LastSeenQueue<Integer>(MAX_ELEMS);
 		} catch (NoSuchAlgorithmException e1) {
 			e1.printStackTrace();
 		}

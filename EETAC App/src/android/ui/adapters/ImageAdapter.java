@@ -46,6 +46,7 @@ public class ImageAdapter extends BaseAdapter {
         	imageView.setLayoutParams(new Gallery.LayoutParams(x, y));
         	imageView.setScaleType(ImageView.ScaleType.FIT_XY);
         	imageView.setBackgroundResource(mGalleryItemBackground);
+//        	notifyDataSetChanged();
         	
         }else
         	imageView = (ImageView) convertView;
@@ -54,7 +55,6 @@ public class ImageAdapter extends BaseAdapter {
 		
 		if (picture != null) {
 			imageView.setTag(picture.id);
-//			System.out.println("Posicion: " + position +" Ruta: " + picture.route_image);
 			imageManager.displayImage(picture.route_image, imageView);
 
 		}

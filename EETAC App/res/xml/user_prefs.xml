@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <!--
-         <com.markupartist.android.widget.ActionBar
-    android:id="@+id/actionbar"
-    style="@style/ActionBar"
-    />
-    -->
-    <CheckBoxPreference
-        android:defaultValue="false"
-        android:key="checkbox"
-        android:summary="Update layouts even when go backwards (slowly)"
-        android:title="Update Always" />
+    <PreferenceCategory android:title="Application Settings" >
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="checkbox"
+            android:summary="Update layouts even when go backwards (slowly)"
+            android:title="Update Always" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="sendTweet"
+            android:summary="Send checkin notifications to twitter"
+            android:title="Twitter Integration" />
 
-    <EditTextPreference
+        <!--
+         <EditTextPreference
         android:key="username"
         android:summary="Enter user name"
         android:title="Username" >
@@ -23,12 +24,20 @@
         android:password="true"
         android:summary="Enter Password for the user name."
         android:title="Password" >
-    </EditTextPreference>
-    <EditTextPreference
-        android:defaultValue="192.168.1.5"
-        android:key="server_ip"
-        android:summary="Enter the REST Server IP"
-        android:title="Server IP" >
-    </EditTextPreference>
+    </EditTextPreference>
+        -->
+        <EditTextPreference
+            android:defaultValue="77.228.234.36"
+            android:key="server_ip"
+            android:summary="Enter the REST Server IP"
+            android:title="Server IP" >
+
+            <!-- android:defaultValue="77.228.234.36" -->
+            <!-- android:defaultValue="192.168.1.5" -->
+        </EditTextPreference>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Delete Information" >
+        <android.ui.pref.AdPreference android:layout="@layout/custom_prefs" />
+    </PreferenceCategory>
 
 </PreferenceScreen>

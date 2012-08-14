@@ -47,14 +47,7 @@
         <TextView
             android:layout_width="75dp"
             android:layout_height="wrap_content"
-            android:text="Name" />
-
-        <EditText
-            android:id="@+id/nameReg"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="27.09"
-            android:singleLine="true" />
+            android:text="Avatar" />
 
         <Button
             android:id="@+id/loadImageReg"
@@ -75,18 +68,6 @@
         android:paddingBottom="5dp"
         android:paddingLeft="10sp"
         android:paddingRight="15sp" >
-
-        <TextView
-            android:layout_width="75dp"
-            android:layout_height="wrap_content"
-            android:text="Surname" />
-
-        <EditText
-            android:id="@+id/surnameReg"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="27.09"
-            android:singleLine="true" />
     </LinearLayout>
 
     <LinearLayout
@@ -131,7 +112,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:inputType="textPassword"
+            android:inputType="textEmailAddress"
             android:singleLine="true" />
     </LinearLayout>
 

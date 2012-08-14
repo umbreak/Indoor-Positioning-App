@@ -5,58 +5,66 @@
     android:padding="3dp" >
 
     <LinearLayout
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center_vertical"
         android:orientation="vertical"
         android:padding="3dp" >
 
         <LinearLayout
+            android:id="@+id/linearLayout1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="vertical" >
+            android:weightSum="1" >
 
-            <LinearLayout
-                android:id="@+id/linearLayout1"
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/author"
+                android:layout_width="0dip"
                 android:layout_height="wrap_content"
-                android:weightSum="1"  >
+                android:layout_weight="0.98"
+                android:ellipsize="end"
+                android:gravity="left"
+                android:padding="0px"
+                android:singleLine="true"
+                android:text="Titulo"
+                android:textColor="#444444"
+                android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/author"
-                    android:layout_width="0dip"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.98"
-                    android:ellipsize="end"
-                    android:gravity="left"
-                    android:padding="0px"
-                    android:singleLine="true"
-                    android:text="Titulo"
-                    android:textColor="#444444"
-                    android:textStyle="bold" />
+            <Button
+                android:id="@+id/deleteButton"
+                android:layout_width="17dip"
+                android:layout_height="17dip"
+                android:background="@drawable/del_btn"
+                android:visibility="gone" android:layout_gravity="center_vertical"/>
+        </LinearLayout>
 
-                <TextView
-                    android:id="@+id/comment_date"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:singleLine="true"
-                    android:text="Date"
-                    android:textSize="10dp"
-                    android:textStyle="italic" />
-
-            </LinearLayout>
+        <LinearLayout
+            android:id="@+id/LinearLayout01"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="1" >
 
             <TextView
                 android:id="@+id/comment_text"
-                android:layout_width="wrap_content"
+                android:layout_width="0dip"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:ellipsize="end"
                 android:maxLines="5"
                 android:orientation="vertical"
                 android:singleLine="false"
                 android:text="Description"
                 android:textColor="#666666" />
+
+            <TextView
+                android:id="@+id/comment_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:singleLine="true"
+                android:text="Date"
+                android:textSize="10dp"
+                android:textStyle="italic" />
         </LinearLayout>
     </LinearLayout>
 

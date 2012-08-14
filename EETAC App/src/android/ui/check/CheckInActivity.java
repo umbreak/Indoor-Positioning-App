@@ -7,6 +7,7 @@ import com.markupartist.android.widget.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.ui.LoginActivity;
 import android.ui.R;
 import android.ui.BaseActivity;
 import android.ui.barcode.IntentIntegrator;
@@ -14,6 +15,7 @@ import android.ui.barcode.IntentResult;
 import android.ui.explore.ExploreLargeActivity;
 import android.util.Log;
 import android.utils.MenuHelper;
+import android.widget.Toast;
 
 /**
  * Checkin layout. Start the Barcode Scanner and handle for the result.
@@ -21,7 +23,7 @@ import android.utils.MenuHelper;
  * INFO: http://code.google.com/p/zxing/wiki/ScanningViaIntent */
 
 public class CheckInActivity extends BaseActivity{
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -36,30 +38,34 @@ public class CheckInActivity extends BaseActivity{
 		super.onResume();
 	}
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {  
-		  switch (requestCode) {
-		  case IntentIntegrator.REQUEST_CODE:
-		     if (resultCode == Activity.RESULT_OK) {
+		switch (requestCode) {
+		case IntentIntegrator.REQUEST_CODE:
+			if (resultCode == Activity.RESULT_OK) {
 
-		        IntentResult intentResult = 
-		           IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
+				IntentResult intentResult = 
+						IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
 
-		        if (intentResult != null) {
+				if (intentResult != null) {
 
-		           String contents = intentResult.getContents();
-		           Intent i;
+					String contents = intentResult.getContents();
+					Intent i;
 					i= new Intent(this, ExploreLargeActivity.class);
-					i.putExtra(GET_SITE, Integer.valueOf(contents.substring(contents.lastIndexOf('=') + 1)));
-					
-		           String format = intentResult.getFormatName();
+					try{
+						int site_id=Integer.valueOf(contents.substring(contents.lastIndexOf('=') + 1)); 
+						i.putExtra(GET_SITE, site_id);
+						startActivity(i);
+					}catch (Exception e) {
+						Toast.makeText(this, "Invalid QR code", Toast.LENGTH_LONG).show();
+					}
+					String format = intentResult.getFormatName();
 
-		           Log.d("SEARCH_EAN", "OK, EAN: " + contents + ", FORMAT: " + format);
-		           startActivity(i);
-		        } else {
-		           Log.e("SEARCH_EAN", "IntentResult je NULL!");
-		        }
-		     } else if (resultCode == Activity.RESULT_CANCELED) {
-		        Log.e("SEARCH_EAN", "CANCEL");
-		     }
-		  }
+					Log.d("SEARCH_EAN", "OK, EAN: " + contents + ", FORMAT: " + format);
+				} else {
+					Log.e("SEARCH_EAN", "IntentResult je NULL!");
+				}
+			} else if (resultCode == Activity.RESULT_CANCELED) {
+				Log.e("SEARCH_EAN", "CANCEL");
+			}
 		}
+	}
 }

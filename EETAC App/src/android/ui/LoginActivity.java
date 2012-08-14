@@ -1,6 +1,7 @@
 package android.ui;
 
 import static android.utils.Actions.*;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -12,6 +13,9 @@ import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.ui.explore.ExploreActivity;
+import android.ui.explore.ExploreFavoritesActivity;
+import android.ui.twitter.OAuthAccessTokenActivity;
+import android.ui.twitter.TwitterUtils;
 import android.utils.MyResultReceiver;
 import android.utils.ServiceHelper;
 import android.view.KeyEvent;
@@ -31,7 +35,7 @@ import android.widget.Toast;
  * SharedPreferences file in PREFS_NAME */
 
 public class LoginActivity extends Activity implements OnClickListener, MyResultReceiver.Receiver{
-
+	private SharedPreferences preferences;
 	private EditText user,pass;
 	private static MyResultReceiver mReceiver;
 	@Override
@@ -52,6 +56,12 @@ public class LoginActivity extends Activity implements OnClickListener, MyResult
 		else {
 			mReceiver=new MyResultReceiver(new Handler());
 			mReceiver.setReceiver(this);
+		}
+		//If user and pass already exist in the preferences, put it in the layout
+		preferences = PreferenceManager.getDefaultSharedPreferences(this);
+		if (preferences.getInt(PREFS_TWITTER_ID, 0) == 0){
+			user.setText(preferences.getString(PREFS_USER, ""));
+			pass.setText(preferences.getString(PREFS_PASS, ""));
 		}
 
 		pass.setOnKeyListener(new OnKeyListener() {
@@ -81,18 +91,24 @@ public class LoginActivity extends Activity implements OnClickListener, MyResult
 				Toast.makeText(this, "Fill the user and password fields.", Toast.LENGTH_SHORT).show();
 		}else if (v.getId() == R.id.registerText)
 			startActivity(new Intent(this, RegisterActivity.class));
-
+		else if (v.getId() == R.id.twitter_button)
+			if (TwitterUtils.isAuthenticated(preferences))
+				ServiceHelper.startAction(LOGIN, mReceiver,getApplicationContext());
+			else
+				startActivity(new Intent(this, OAuthAccessTokenActivity.class));
 
 	}
 	private void loginAction(){
 		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(pass.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);	
 
-		SharedPreferences.Editor editPrefs = PreferenceManager.getDefaultSharedPreferences(this).edit();
+		SharedPreferences.Editor editPrefs = preferences.edit();
 		editPrefs.putString(PREFS_USER, user.getText().toString());
 		editPrefs.putString(PREFS_PASS, pass.getText().toString());
+		editPrefs.putInt(PREFS_TWITTER_ID, 0);
 		editPrefs.commit();
-		ServiceHelper.startAction(POST_LOGIN, mReceiver,getApplicationContext());
+
+		ServiceHelper.startAction(LOGIN, mReceiver,getApplicationContext());
 	}
 
 	@Override
@@ -103,6 +119,20 @@ public class LoginActivity extends Activity implements OnClickListener, MyResult
 		return mReceiver;
 	}
 
+	@Override
+	protected void onPause() {
+		mReceiver.clearReceiver();
+		super.onPause();
+	}
+	@Override
+	protected void onResume() {
+		mReceiver.setReceiver(this);
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		if (getIntent().getBooleanExtra(TWITTER_NOTIFICATOINS, false))
+			if (prefs.getInt(PREFS_TWITTER_ID, 0) > 0)
+				ServiceHelper.startAction(LOGIN, mReceiver,getApplicationContext());
+		super.onResume();
+	}
 
 	public void onReceiveResult(int resultCode, Bundle resultData) {
 		switch (resultCode) {
@@ -110,23 +140,12 @@ public class LoginActivity extends Activity implements OnClickListener, MyResult
 			break;
 		}
 		case STATUS_FINISHED: {
-			int result=Integer.valueOf(resultData.getString(POST_LOGIN));
-			if (result>0){
-				SharedPreferences.Editor editor=getSharedPreferences(PREFS_FILE, 0).edit();
-				editor.putInt(PREFS_USER_ID, result);
-				editor.commit();
-				startActivity(new Intent(this, ExploreActivity.class));
-				finish();
-			} else if (result == -1)
-				Toast.makeText(LoginActivity.this, "Password incorrect", Toast.LENGTH_LONG).show();
-			else if (result == -3)
-				Toast.makeText(LoginActivity.this, "User doesn't exist", Toast.LENGTH_LONG).show();
-			else
-				Toast.makeText(LoginActivity.this, "No response from the server " + PreferenceManager.getDefaultSharedPreferences(this).getString(PREFS_SERVER, null),  Toast.LENGTH_LONG).show();
+			startActivity(new Intent(this, ExploreActivity.class));
+			finish();
 			break;
 		}
 		case STATUS_ERROR: {
-			Toast.makeText(LoginActivity.this, "Error in the authentication process", Toast.LENGTH_LONG).show();
+			Toast.makeText(LoginActivity.this, resultData.getString(Intent.EXTRA_TEXT), Toast.LENGTH_LONG).show();
 			break;
 		}
 		}		
